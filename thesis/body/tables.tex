@@ -1,289 +1,346 @@
 % !Mode:: "TeX:UTF-8"
 
-\chapter{表格的绘制方法}
+\chapter{魔方还原算法的研发与优化}
 
-\section{本科生毕业设计论文的绘表规范}
+本章详细阐述了本课题在软件层面的工作与成果，主要体现在魔方还原算法的并行还原优化方面，本章是系统算法的核心所在。本章模块的主要工作包括两阶段算法的应用，并行还原优化等。
 
-表应有自明性。表格不加左、右边线。表的编排建议采用国际通行的三线表。表内中文书写使用宋体五号字。
+\section{开发环境简介}
 
-每个表格之上均应有表题（由表序和表名组成）。表序一般按章编排，如第~1~章第一个插表的序号为“表~1-1”等。表序与表名之间空两格，
-表名使用中文五号字，居中。表名中不允许使用标点符号，表名后不加标点。
-表头设计应简单明了，尽量不用斜线。表头中可采用化学，物理量等专业符号。
+本系统的开发在软件层次分为上位机和下位机两部分。其上位机程序部分是在Ubuntu 20.04.3 LTS的操作系统上使用Python语言并在JetBrains公司的Pycharm集成开发环境下进行魔方还原算法的开发；下位机程序部分首先在Windows10的操作系统上使用基于类C + + 语言在Arduino开发环境下进行指令接收、电机旋转等相关功能的开发，待开发结束后将代码烧录至Arduino Nano开发板上。
 
-全表如用同一单位，则将单位符号移至表头右上角，加圆括号。
-表中数据应准确无误，书写清楚。数字空缺的格内加横线“－”（占~2~个数字宽度）。表内文字或数字上、下或左、右相同时，
-采用通栏处理方式，不允许用“〃”、“同上”之类的写法。
+\subsection{Ubuntu 20.04操作系统}
 
-表内文字使用宋体五号字，垂直居中书写，起行空一格、转行顶格、句末不加标点。
-如某个表需要转页接排，在随后的各页上应重复表的编号。编号后加“（续表）”，表题可省略。续表应重复表头。
-表格绘制完成之后，与正文空一行。
+Ubuntu 20.04.3 LTS (Focal Fossa)。Ubuntu 20.04是 Ubuntu 的第 8 个 LTS 版本，代号为"Focal Fossa"，此次版本将会获得 5 年的技术支持，直至2025年4月，本次长期支持版本包含了诸多增强的安全特性，包括可防止低层攻击和包括可防止 rootkit 和低级攻击的安全启动。Ubuntu 20.04 LTS Beta 已将大部分核心软件包和工具链升级至新版本，包括正在使用的 Linux 5.4 内核，GNOME 3.36 桌面环境，文件系统升级至 ZFS 0.8.3。
 
-\section{普通表格的绘制方法}
+以下是Ubuntu20.04的特点：GNOME 3.36 是默认的桌面系统；性能大幅度提高；拥有华丽的 Yaru 主题，同时也具有黑暗模式；改进的 ZFS 支持可以获得最新的 Linux 内核 5.4（LTS）；增加了对 exFAT 的支持；改进硬件和图形支持；更新软件 Python 3.8.2；Wireguard 已被移植到 Linux 内核5.4，可以在 Ubuntu 20.04 上使用等。
 
-表格应具有三线表格式，因此需要调用~booktabs~宏包，其标准格式如表~\ref{tab:table1}~所示。
+\subsection{PyCharm集成开发环境}
+
+PyCharm是一种Python语言的集成开发环境。该集成开发环境在先进代码分析程序的支持下，使其成为 Python 专业开发人员和刚起步人员使用的有力工具。PyCharm是用于Python脚本语言的最流行的IDE。除此之外，该集成开发环境提供了以下高级功能：代码补全、项目代码导航、代码分析、Git可视化、代码覆盖率、包装管理、本地历史、重构等。总的来说，PyCharm还是一款比较强大的IDE。
+
+\subsection{PyQt5库}
+
+Qt框架用C/C++语言编写的，PyQt是Qt框架的Python语言实现，是最强大的GUI库之一。在本系统中该库主要用于制作UI界面。其特性有以下几点：能够跨平台运行；基于高性能的Qt的GUI控件集；对Qt库进行完全封装；使用信号槽机制进行通信；提供一整套种类齐全的窗口控件等~\cite{28}。
+
+PyQt5中的类包含很多模块与功能，其中QtWidgets类包含了一系列创建桌面应用的UI元素；QtTest提供了测试PyQt5应用的工具；QtXml包含了处理xml的类，提供了SAX和DOM等API的工具； QtSql提供了处理数据库的工具；QtMultimedia包含了处理多媒体的内容和调用摄像头API的类；QtPositioning包含了定位的类，可以使用卫星、WiFi甚至文本。
+
+上述功能模块中，本系统只选用QtWidgets类，目的是制作一个简易美观的UI界面。除此之外还有一些人机交互功能更是凸显了本系统的实用性，对于系统使用者来说大大提高了使用便捷性。
+
+\subsection{串口通信模块}
+
+串口是计算机上一种非常通用的设备通信协议。而串口通信是指外设与计算机之间通过数据信号线等方式，设置波特率、停止位、校验位、字节大小等相关参数后按位进行传输数据的一种通讯方式。
+
+本系统的串口通信模块使用USB2.0接口连接上位机与下位机，负责两端的通信~\cite{29}，传输电机旋转的操作指令。PySerial模块封装了Python语言对串行端口的访问。
+
+\section{系统目录规划表}
+
+本系统将所有文件与目录放置在rubik文件夹下，该文件夹包含src文件夹以及系统运行的必要配置文件，src文件夹包含魔方块识别图片的images文件夹与系统运行的Python文件，images文件夹里包含魔方块颜色识别前后的marked和unmarked文件夹，marked文件夹存放识别并标记后的图片，unmarked文件夹存放识别前的图片。系统目录规划的具体情况如下表~\ref{tab:3-1}~系统目录规划表所示：
+
 \begin{table}[H]
-\caption{符合本科生毕业论文绘图规范的表格}\label{tab:table1}
-\vspace{0.5em}
-\begin{center}
-{\wuhao
-\begin{tabular}{ccccc}
-\toprule[1.5pt]
-$D$(in) & $P_u$(lbs) & $u_u$(in) & $\beta$ & $G_f$(psi.in)\\
-\midrule[1pt]
- 5 & 269.8 & 0.000674 & 1.79 & 0.04089\\
-10 & 421.0 & 0.001035 & 3.59 & 0.04089\\
-20 & 640.2 & 0.001565 & 7.18 & 0.04089\\
- 5 & 269.8 & 0.000674 & 1.79 & 0.04089\\
-10 & 421.0 & 0.001035 & 3.59 & 0.04089\\
-20 & 640.2 & 0.001565 & 7.18 & 0.04089\\
- 5 & 269.8 & 0.000674 & 1.79 & 0.04089\\
-10 & 421.0 & 0.001035 & 3.59 & 0.04089\\
-20 & 640.2 & 0.001565 & 7.18 & 0.04089\\
- 5 & 269.8 & 0.000674 & 1.79 & 0.04089\\
-10 & 421.0 & 0.001035 & 3.59 & 0.04089\\
-20 & 640.2 & 0.001565 & 7.18 & 0.04089\\
-\bottomrule[1.5pt]
-\end{tabular}}
-\end{center}
-\vspace{\baselineskip}
+	\caption{系统目录规划表}\label{tab:3-1}
+	\vspace{0.5em}
+	\begin{center}
+		{\wuhao
+			\begin{tabular}{ll}
+				\toprule
+				目录 & 名称及说明	\\
+				\midrule
+				/rubik & 总目录，此目录存放系统的所有文件，包括环境配置文件等 \\
+				/rubik/src & 用于存放上位机所有运行文件，包括业务逻辑代码等\\
+				/rubik/src/images & 存放魔方块颜色识别图片的目录\\
+				/rubik/src/images/marked & 存放识别并标记后的图片\\
+				/rubik/src/images/unmarked & 存放识别前保存的图片\\
+				\bottomrule
+		\end{tabular}}
+	\end{center}
+	\vspace{-1.5em}
 \end{table}
 
-其绘制表格的代码及其说明如下。
-\vspace{1em}\noindent\hrule
+\section{系统算法流程图}
 
-\begin{verbatim}
+本系统的整体运作流程如下：首先通过摄像头获取魔方六个面的图像，再根据魔方块颜色识别算法对每个魔方块进行颜色识别，如果识别完全正确得到魔方块颜色序列后并计算出可行的解法，那么可直接执行魔方复原的操作。如果识别不完全正确，则需要根据魔方块位置和魔方块颜色的信息手动矫正识别结果，待矫正完所有错误颜色结果并得到可行还原解法之后即可执行魔方复原操作。该算法的流程图如下图~\ref{fig:3-1}~所示：
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.2\textwidth]{3-1}
+	\caption{系统流程图}\label{fig:3-1}
+\end{figure}
+
+\section{系统实现}
+
+\subsection{可视化界面设计}
+
+本论文中的界面设计部分首先通过QTCreator设计界面的大致结构，例如按钮、窗体等构件的分布，设计图如下图~\ref{fig:3-2}~所示，将设计图所生成的ui文件转换至py文件并微调参数后即是本系统的初始界面。
+
+该设计图大致分为三个模块，界面最上方是图片显示模块，在系统运行后在该模块会显示摄像头捕捉到的四张图片；中间类似魔方展开图部分是魔方可视化模块，该模块将颜色识别后的结果与其背景颜色相结合，系统使用者可通过相应魔方块位置的背景颜色直观地了解魔方块颜色识别的结果，为后续魔方块颜色矫正过程提供了便捷。设计图界面最下方是操作模块，在该模块中提供识别、颜色矫正、还原可行性验证、魔方复原的功能，极大程度上减少魔方复原出错的可能性。
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{3-2}
+	\caption{可视化界面设计图}\label{fig:3-2}
+\end{figure}
+
+在可视化界面设计中，不同函数有不同的功能，其中包含初始化参数、设置构件布局及命名、配置构件颜色、设置按钮触发器等。详细的函数说明表如下表~\ref{tab:3-2}~所示：
+
 \begin{table}[H]
-\caption{表标题}\label{标签名(通常为 tab:tablename)}
-\vspace{0.5em}{\centering\wuhao
-\begin{tabular}{cc...c}
-\toprule[1.5pt]
-表头第1个格   & 表头第2个格   & ... & 表头第n个格  \\
-\midrule[1pt]
-表中数据(1,1) & 表中数据(1,2) & ... & 表中数据(1,n)\\
-表中数据(2,1) & 表中数据(2,2) & ... & 表中数据(2,n)\\
-表中数据(3,1) & 表中数据(3,2) & ... & 表中数据(3,n)\\
-表中数据(4,1) & 表中数据(4,2) & ... & 表中数据(4,n)\\
-...................................................\\
-表中数据(m,1) & 表中数据(m,2) & ... & 表中数据(m,n)\\
-\bottomrule[1.5pt]
-\end{tabular}}
-\vspace{\baselineskip}
+	\caption{详细函数说明表}\label{tab:3-2}
+	\vspace{0.5em}
+	\begin{center}
+		{\wuhao
+			\begin{tabular}{cc}
+				\toprule
+				函数名称 & 主要功能	\\
+				\midrule
+				\_\_init\_\_ & 初始化参数 \\
+				setupUi & 设置构件布局及命名\\
+				setStyleSheet & 配置构件颜色\\
+				retranslateUi & 设置构件显示的内容\\
+				click\_connecting & 设置按钮触发器\\
+				push\_recognize\_button & 魔方块颜色识别\\
+				push\_correct\_button & 修正魔方块颜色结果\\
+				push\_verify\_button & 验证还原可行性\\
+				push\_solve\_button & 复原魔方\\
+				solve\_rubik & 求解魔方复原步骤\\
+				rec\_color & 魔方块颜色划分\\
+				setLabel & 设置可视化界面中魔方块颜色\\
+				mark\_img & 标记识别结果\\
+				communicate & 串口通信\\
+				push\_solve\_button & 复原魔方\\
+				solve\_rubik & 求解魔方复原步骤\\
+				\bottomrule
+		\end{tabular}}
+	\end{center}
+	\vspace{-1.5em}
 \end{table}
-\end{verbatim}
 
-\noindent\hrule
+\section{魔方块颜色识别}
 
-\begin{verbatim}
-table环境是一个将表格嵌入文本的浮动环境。
-\wuhao命令将表格的字号设置为五号字（10.5pt），在绘制表格结束退出时，不需要将字号再改回为\xiaosi，正文字号默认为小四号字（12pt）。 % XXX:重构之后不能这样做了，应该把整个表格用{\wuhao\begin{tabular}\ldots\end{tabular}} 包起来
-tabular环境的必选参数由每列对应一个格式字符所组成：c表示居中，l表示左对齐，r表示右对齐，其总个数应与表的列数相同。此外，@{文本}可以出现在任意两个上述的列格式之间，其中的文本将被插入每一行的同一位置。表格的各行以\\分隔，同一行的各列则以&分隔。
-\toprule、\midrule和\bottomrule三个命令是由booktabs宏包提供的，其中\toprule和\bottomrule分别用来绘制表格的第一条（表格最顶部）和第三条（表格最底部）水平线，\midrule用来绘制第二条（表头之下）水平线，且第一条和第三条水平线的线宽为1.5pt，第二条水平线的线宽为1pt。
-引用方法：“如表~\ref{tab:tablename}~所示”。
-\end{verbatim}
+本系统的魔方块颜色识别模块基于OpenCV库，采用HSV颜色模型对魔方块进行颜色的判断。与RGB颜色模型相比，HSV颜色模型对亮度并不敏感，反而是RGB 颜色空间的三个分量都与亮度密切相关，即只要亮度改变，三个分量都会随之相应地改变，因此使用RGB颜色模型在某种程度上无法彻底摆脱环境亮度对颜色识别的影响。下图~\ref{fig:3-3}~表示的 HSV 颜色空间，圆柱体的横截面可以看作是一个极坐标系，其中色调用极坐标的极角表示，饱和度用极坐标的极轴长度表示，明度用圆柱中轴的高度表示。
 
-\noindent\hrule
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.6\textwidth]{3-3}
+	\caption{HSV颜色空间示意图}\label{fig:3-3}
+\end{figure}
 
-\section{长表格的绘制方法}
+HSV颜色空间比RGB颜色空间更容易跟踪某种颜色的物体，因此HSV颜色空间常用于分割指定颜色的物体。考虑到自然环境下获取的图像容易受自然光照、遮挡和阴影等情况的影响，因此采用HSV颜色模型对魔方块进行颜色识别。文献\mycite{30}\mycite{31}\mycite{32}是在HSV颜色空间下进行图像检索，例如电影中的镜头检测等，证明该颜色空间也可用于图像处理。文献\mycite{33}是基于HSV的机器人船舶导航系统，并且在低光照的情况下也可以很好的进行船舶导航。因此，周围环境光照的亮度强弱在HSV颜色空间下对系统的整体影响较小。
 
-长表格是当表格在当前页排不下而需要转页接排的情况下所采用的一种表格环境。若长表格仍按照普通表格的绘制方法来获得，
-其所使用的~\verb|table|~浮动环境无法实现表格的换页接排功能，表格下方过长部分会排在表格第~1~页的页脚以下。为了能够实现长表格的转页接排功能，
-需要调用~\verb|longtable|~宏包，由于长表格是跨页的文本内容，因此只需要单独的~\verb|longtable|~环境，所绘制的长表格的格式如表~\ref{tab:table2}~所示。
-
-此长表格~\ref{tab:table2}~第~2~页的标题“编号（续表）”和表头是通过代码自动添加上去的，无需人工添加，若表格在页面中的竖直位置发生了变化，长表格在第~2~页
-及之后各页的标题和表头位置能够始终处于各页的最顶部，也无需人工调整，\XeLaTeX~系统的这一优点是~Word~等软件所无法企及的。
-
-下段内容是为了让下面的长表格分居两页，看到表标题“编号(续表)”的效果。此模板的完成时间正值雨后初霁的四月二十五日，故引用林徽因《你是人间的四月天》全文：
-\begin{center}
-\begin{minipage}[c]{0.5\textwidth}
-
-\textbf{你是人间的四月天}
-
-\vspace{12pt}
-我说你是人间的四月天\\
-笑音点亮了四面风\\
-轻灵在春的光艳中交舞着变\\
-你是四月早天里的云烟\\
-黄昏吹着风的软\\
-星子在无意中闪\\
-细雨点洒在花前\\
-那轻~~那娉婷\\
-你是鲜妍\\
-百花的冠冕你戴着\\
-你是天真~~庄严~~你是夜夜的月圆\\
-雪化后那片鹅黄\\
-你像~~新鲜初放芽的绿\\
-你是柔嫩喜悦\\
-水光浮动着你梦期待中白莲\\
-你是一树一树的花开\\
-是燕~~在梁间呢喃\\
-你是爱~~是暖\\
-是希望\\
-你是人间的四月天
-\end{minipage}
-\end{center}
-
-{\wuhao{\begin{longtable}{cc}
-\caption{浙江工业大学各学院名称一览}\label{tab:table2}
- \vspace{0.5em}\\
-\toprule[1.5pt] 学院名称 & 网址\\ \midrule[1pt]
-\endfirsthead
-\multicolumn{2}{c}{表~\thetable（续表）}\vspace{0.5em}\\
-\toprule[1.5pt] 学院名称 & 网址\\ \midrule[1pt]
-\endhead
-\bottomrule[1.5pt]
-\endfoot
-法学院 & \url{http://www.law.zjut.edu.cn/}\\
-化学工程与材料学院 &  \url{http://www.ce.zjut.edu.cn/}\\
-机械工程学院 & \url{http://www.jdxy.zjut.edu.cn/}\\
-信息工程学院 & \url{http://www.ie.zjut.edu.cn/}\\
-计算机科学与技术学院 & \url{http://www.software.zjut.edu.cn/}\\
-软件学院 & \url{http://www.software.zjut.edu.cn/}\\
-经贸管理学院 & \url{http://www.cba.zjut.edu.cn/}\\
-建筑工程学院& \url{http://www.jgxy.zjut.edu.cn/}\\
-生物与环境工程学院 & \url{http://www.bee.zjut.edu.cn/}\\
-理学院 & \url{http://www.lxy.zjut.edu.cn/}\\
-教育科学与技术学院 & \url{http://www.et.zjut.edu.cn/}\\
-人文学院 & \url{http://www.rwxy.zjut.edu.cn/}\\
-健行学院 & \url{http://www.jxxy.zjut.edu.cn/}\\
-外国语学院 & \url{http://www.fl.zjut.edu.cn/}\\
-国际学院 & \url{http://www.gjxy.zjut.edu.cn/}\\
-政治与公共管理学院 & \url{http://www.sppa.zjut.edu.cn/}\\
-艺术学院 & \url{http://www.art.zjut.edu.cn/}\\
-药学院 & \url{http://www.yxy.zjut.edu.cn/}\\
-成人教育学院 & \url{http://www.cj.zjut.edu.cn/}\\
-之江学院 & \url{http://www.zjc.zjut.edu.cn/}\\
-研究生院 & \url{http://www.gs.zjut.edu.cn/}\\
-\end{longtable}}}
-\vspace{\baselineskip}
-
-绘制长表格的代码及其说明如下。
-\vspace{1em}\noindent\hrule
-
-\begin{verbatim}
-{\wuhao\begin{longtable}{cc...c}
-\caption{表标题}\label{标签名(通常为 tab:tablename)}\\
-\toprule[1.5pt] 表头第1个格 & 表头第2个格 & ... & 表头第n个格\\ \midrule[1pt]
-\endfirsthead
-\multicolumn{n}{c}{表~\thetable（续表）}\vspace{0.5em}\\
-\toprule[1.5pt] 表头第1个格 & 表头第2个格 & ... & 表头第n个格\\ \midrule[1pt]
-\endhead
-\bottomrule[1.5pt]
-\endfoot
-表中数据(1,1) & 表中数据(1,2) & ... & 表中数据(1,n)\\
-表中数据(2,1) & 表中数据(2,2) & ... & 表中数据(2,n)\\
-...................................................\\
-表中数据(m,1) & 表中数据(m,2) & ... & 表中数据(m,n)\\
-\end{longtable}}
-\end{verbatim}
-
-\noindent\hrule
-\begin{verbatim}
-在绘制长表格的前面留出一个空白行，并在第2行的一开始全局定义长表格的字号为五号字，这样能够保证长表格之前段落的行距保持不变。
-在绘制长表格结束后，需要\xiaosi命令重新将字号改为小四号字。
-\endhead之前的文字描述的是第2页及其之后各页的标题或表头；
-\endfirsthead之前的文字描述的是第1页的标题和表头，若无此命令，则第1页的表头和标题由\endhead命令确定；
-同理，\endfoot之前的文字描述的是除最后一页之外每页的表格底部内容；
-\endlastfoot之前的文字描述的是最后一页的表格底部内容，若无此命令，
-则最后一页的表格底部内容由\endfoot命令确定；由于规范中长表格每页底部内容均相同（水平粗线），因此模板中没有用到\endlastfoot命令。
-\end{verbatim}
-
-\noindent\hrule
-\section{列宽可调表格的绘制方法}
-论文中能用到列宽可调表格的情况共有两种：一种是当插入的表格某一单元格内容过长以至于一行放不下的情况，
-另一种是当对公式中首次出现的物理量符号进行注释的情况。这两种情况都需要调用~tabularx~宏包。下面将分别对这两种情况下可调表格的绘制方法进行阐述。
-\subsection{表格内某单元格内容过长的情况}
-
-首先给出这种情况下的一个例子如表~\ref{tab:table3}~所示。
-\begin{table}[htbp]
-\caption{最小的三个正整数的英文表示法}\label{tab:table3}
-\vspace{0.5em}{\wuhao
-\begin{tabularx}{\textwidth}{llX}
-\toprule[1.5pt]
-Value & Name & Alternate names, and names for sets of the given size\\\midrule[1pt]
-1 & One & ace, single, singleton, unary, unit, unity\\
-2 & Two & binary, brace, couple, couplet, distich, deuce, double, doubleton, duad, duality, duet, duo, dyad, pair, snake eyes, span, twain, twosome, yoke\\
-3 & Three & deuce-ace, leash, set, tercet, ternary, ternion, terzetto, threesome, tierce, trey, triad, trine, trinity, trio, triplet, troika, hat-trick\\\bottomrule[1.5pt]
-\end{tabularx}}
-\vspace{\baselineskip}
+\begin{table}[H]
+	\caption{HSV颜色分量范围表}\label{tab:3-3}
+	\vspace{0.5em}
+	\begin{center}
+		{\wuhao
+			\begin{tabular}{cccccccccccc}
+				\toprule
+				&黑&灰&白&\multicolumn{2}{c}{红}&橙&黄&绿&青&蓝&紫	\\
+				\midrule
+				$H_{min}$&0&0&0&0&156&11&26&35&78&100&125\\
+				$H_{max}$&180&180&180&10&180&25&34&77&99&124&155\\
+				$S_{min}$&0&0&0&\multicolumn{2}{c}{43}&43&43&43&43&43&43\\
+				$S_{max}$&255&43&30&\multicolumn{2}{c}{255}&255&255&255&255&255&255\\
+				$V_{min}$&0&46&221&\multicolumn{2}{c}{46}&46&46&46&46&46&46\\
+				$V_{max}$&46&220&255&\multicolumn{2}{c}{255}&255&255&255&255&255&255\\
+				\bottomrule
+		\end{tabular}}
+	\end{center}
+	\vspace{-1.5em}
 \end{table}
-绘制这种表格的代码及其说明如下。
-\vspace{1em}\noindent\hrule
-\begin{verbatim}
-\begin{table}[htbp]
-\caption{表标题}\label{标签名(通常为 tab:tablename)}
-\vspace{0.5em}{\wuhao
-\begin{tabularx}{\textwidth}{l...X...l}
-\toprule[1.5pt]
-表头第1个格   & ... & 表头第X个格   & ... & 表头第n个格  \\
-\midrule[1pt]
-表中数据(1,1) & ... & 表中数据(1,X) & ... & 表中数据(1,n)\\
-表中数据(2,1) & ... & 表中数据(2,X) & ... & 表中数据(2,n)\\
-.........................................................\\
-表中数据(m,1) & ... & 表中数据(m,X) & ... & 表中数据(m,n)\\
-\bottomrule[1.5pt]
-\end{tabularx}}
-\vspace{\baselineskip}
+
+同时，考虑到本系统的摄像头角度及位置固定，因此在判断每个魔方块的颜色时并不需要做定位魔方块等工作，只需要人为标定每张图像中不同魔方块的固定范围即可。上表是HSV颜色分量范围表，对图像在HSV颜色空间的变量范围判断时，先是计算固定范围内像素点的分量平均值，接着判断其平均值在哪个范围内即可粗略判断颜色，最后根据不同的运行环境进行多次实验测试并修改具体分量边界值参数。该魔方块颜色识别的算法流程图如下图~\ref{fig:3-4}~所示：
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{3-4}
+	\caption{魔方块颜色识别流程图}\label{fig:3-4}
+\end{figure}
+
+在魔方块颜色识别中，包括捕捉魔方面图像、计算HSV平均值及颜色模型转换等函数，详细函数说明如下表~\ref{tab:3-4}~所示：
+
+\begin{table}[H]
+	\caption{函数清单}\label{tab:3-4}
+	\vspace{0.5em}
+	\begin{center}
+		{\wuhao
+			\begin{tabular}{cc}
+				\toprule
+				函数名称 & 主要功能	\\
+				\midrule
+				catch\_frames & 捕捉魔方面图像 \\
+				cal\_hsv & 计算HSV各项平均值 \\
+				detect & 颜色模型转换\\
+				print\_hsv & 输出HSV颜色模型结果\\
+				\bottomrule
+		\end{tabular}}
+	\end{center}
+	\vspace{-1.5em}
 \end{table}
-\end{verbatim}
 
-\noindent\hrule
-\begin{verbatim}
-tabularx环境共有两个必选参数：第1个参数用来确定表格的总宽度，这里取为排版表格能达到的最大宽度——正文宽度\textwidth；第2个参数用来确定每列格式，其中标为X的项表示该列的宽度可调，其宽度值由表格总宽度确定。
-标为X的列一般选为单元格内容过长而无法置于一行的列，这样使得该列内容能够根据表格总宽度自动分行。若列格式中存在不止一个X项，则这些标为X的列的列宽相同，因此，一般不将内容较短的列设为X。
-标为X的列均为左对齐，因此其余列一般选为l（左对齐），这样可使得表格美观，但也可以选为c或r。
-\end{verbatim}
+下列四组图展示的是不同视角的摄像头处理前后的图片。每组右侧图片中的绿色矩形代表的是每个魔方块的像素范围，下列四组图片中，一共有48个绿色矩形，对应六个面的八个魔方块。
 
-\noindent\hrule
-\subsection{对物理量符号进行注释的情况}
-为使得对公式中物理量符号注释的转行与破折号“———”后第一个字对齐，此处最好采用表格环境。此表格无任何线条，左对齐，
-且在破折号处对齐，一共有“式中”二字、物理量符号和注释三列，表格的总宽度可选为文本宽度，因此应该采用\verb|tabularx|环境。
-由\verb|tabularx|环境生成的对公式中物理量符号进行注释的公式如式(\ref{eq:1})所示。
-%\vspace*{10pt}
+\begin{figure}[H]
+	\centering
+	\subfigure{
+		\includegraphics[width=0.4\textwidth]{3-5}}
+	\subfigure{
+		\includegraphics[width=0.4\textwidth]{3-5.1}}
+	\caption{左上方视角原图（左）与处理后图片（右）}\label{fig:3-5}
+\end{figure}
 
-\begin{equation}\label{eq:1}
-\ddot{\boldsymbol{\rho}}-\frac{\mu}{R_{t}^{3}}\left(3\mathbf{R_{t}}\frac{\mathbf{R_{t}\rho}}{R_{t}^{2}}-\boldsymbol{\rho}\right)=\mathbf{a}
-\end{equation}
+\begin{figure}[H]
+	\centering
+	\subfigure{
+		\includegraphics[width=0.4\textwidth]{3-6}}
+	\subfigure{
+		\includegraphics[width=0.4\textwidth]{3-6.1}}
+	\caption{右后方视角原图（左）与处理后图片（右）}\label{fig:3-6}
+\end{figure}
 
-\begin{tabularx}{\textwidth}{@{}l@{\quad}r@{———}X@{}}
-式中& $\bm{\rho}$ &追踪飞行器与目标飞行器之间的相对位置矢量；\\
-&  $\bm{\ddot{\rho}}$&追踪飞行器与目标飞行器之间的相对加速度；\\
-&  $\mathbf{a}$   &推力所产生的加速度；\\
-&  $\mathbf{R_t}$ & 目标飞行器在惯性坐标系中的位置矢量；\\
-&  $\omega_{t}$ & 目标飞行器的轨道角速度；\\
-&  $\mathbf{g}$ & 重力加速度，$=\frac{\mu}{R_{t}^{3}}\left(
-3\mathbf{R_{t}}\frac{\mathbf{R_{t}\rho}}{R_{t}^{2}}-\bm{\rho}\right)=\omega_{t}^{2}\frac{R_{t}}{p}\left(
-3\mathbf{R_{t}}\frac{\mathbf{R_{t}\rho}}{R_{t}^{2}}-\bm{\rho}\right)$，这里~$p$~是目标飞行器的轨道半通径。
-\end{tabularx}
-\vspace{\wordsep}
+\begin{figure}[H]
+	\centering
+	\subfigure{
+		\includegraphics[width=0.4\textwidth]{3-7}}
+	\subfigure{
+		\includegraphics[width=0.4\textwidth]{3-7.1}}
+	\caption{右下方视角原图（左）与处理后图片（右）}\label{fig:3-7}
+\end{figure}
 
-其中生成注释部分的代码及其说明如下。
+\begin{figure}[H]
+	\centering
+	\subfigure{
+		\includegraphics[width=0.4\textwidth]{3-8}}
+	\subfigure{
+		\includegraphics[width=0.4\textwidth]{3-8.1}}
+	\caption{右下方视角原图（左）与处理后图片（右）}\label{fig:3-8}
+\end{figure}
 
-\vspace{1em}\noindent\hrule
+\subsection{Kociemba算法}
 
-\begin{verbatim}
-\begin{tabularx}{\textwidth}{@{}l@{\quad}r@{— — —}X@{}}
-式中 & symbol-1 & symbol-1的注释内容；\\
-     & symbol-2 & symbol-2的注释内容；\\
-     .............................；\\
-     & symbol-m & symbol-m的注释内容。
-\end{tabularx}\vspace{\wordsep}
-\end{verbatim}
+Kociemba算法，即两阶段算法，是由Thistlethwaite算法演变而来的。该算法采用降解子群~\cite{34}的核心思想将魔方复原分为四个步骤：
 
-\noindent\hrule
+\begin{gather}
+	G0 =<U,D,L,R,F,B>,\\
+	G1 =<U,D,L,R,F2,B2>,\label{equ:3-2}\\
+	G2 =<U,D,L2,R2,F2,B2>,\\
+	G3 =<U2,D2,L2,R2,F2,B2>,\\
+	G4 =<I>\text{（还原态）}.
+\end{gather}
 
-\begin{verbatim}
-   tabularx环境的第1个参数选为正文宽度，第2个参数里面各个符号的意义为：
-   第1个@{}表示在“式中”二字左侧不插入任何文本，“式中”二字能够在正文中左对齐，若无此项，则“式中”二字左侧会留出一定的空白；
-   @{\quad}表示在“式中”和物理量符号间插入一个空铅宽度的空白；
-   @{— — —}实现插入破折号的功能，它由三个1/2的中文破折号构成；
-   第2个@{}表示在注释内容靠近正文右边界的地方能够实现右对齐。
-\end{verbatim}
+其中 U,D,L,R,F,B 分别代表顶面、底面、左面、右面、前面或后面旋转90°，如果字母后面紧跟数字 2 ，则代表旋转180°，例如 U2 意为顶面旋转180°。
 
-\noindent\hrule\vspace{1em}
+以公式~\ref{equ:3-2}~为例，G1 子群代表的是由魔方顶面、底面、左面或右面旋转 90° 与前面或后面旋转 180° 任意组合后可还原魔方的魔方状态。换言之，当 G1 子群状态的魔方复原过程中，不允许出现魔方前面、后面旋转 90° 的情况。
 
-由此方法生成的注释内容应紧邻待注释公式并置于其下方，因此不能将代码放入~\verb|table|~浮动环境中。但此方法不能实现自动转页接排，
-可能会在当前页剩余空间不够时，全部移动到下一页而导致当前页出现很大空白。因此在需要转页处理时，还请您手动将需要转页的代码放入一个
-新的~\verb|tabularx|~环境中，将原来的一个~\verb|tabularx|~环境拆分为两个~\verb|tabularx|~环境。
+上述各个子群降解过程中，其子群状态数变化如下表所示，影响因子意为降解至当前子群状态数缩小的倍数。
 
-若想获得绘制表格的更多信息，参见网络上的~\href{http://www.tug.org/pracjourn/2007-1/mori/}{Tables in \LaTeXe: Packages and Methods}~文档。
+\begin{table}[H]
+	\caption{子群状态数变化表}\label{tab:3-5}
+	\vspace{0.5em}
+	\begin{center}
+		{\wuhao
+			\begin{tabular}{ccc}
+				\toprule
+				群 & 状态数 & 影响因子	\\
+				\midrule
+				$G0=<U,D,L,R,F,B>$ & $4.33 \times 10^{19}$ & / \\
+				$G1 =<U,D,L,R,F2,B2>$& $2.11 ×10^{16}$ &$2048(2^{11})$\\
+				$G2 =<U,D,L2,R2,F2,B2>$&$1.95 ×10^{10}$&$1082565\left(\frac{12!}{8!\times4!\times3^7}\right)$\\
+				$G3 =<U2,D2,L2,R2,F2,B2>$&$6.63 ×10^5$&$29400\left(\frac{8!}{4!\times4!}\times2\times3\right)$\\
+				$G4 =<I>\text{（还原态）}$&$1$&$663552\left(\frac{4!^5}{12}\right)$\\
+				\bottomrule
+		\end{tabular}}
+	\end{center}
+	\vspace{-1.5em}
+\end{table}
 
+而Kociemba算法是分别将上述Thistlethwaite算法的前两个阶段合并为一个阶段，后两个阶段合并为另外一个阶段，在前后两个阶段合并的过程中都使用了在A*算法基础上加入迭代加深思想的IDA* 搜索算法~\cite{35}~\cite{36}。迭代加深~\cite{37}的操作可以保证搜索树上面的任何一个节点都可以获得精确的启发函数值。
+
+本课题研究的算法内容是搭建借助两阶段算法应用至本魔方复原系统并采用部分并行的方式优化其还原步骤。
+
+第一阶段：如果在拧魔方的时候不使用$\{R,R',L,L',F,F',B,B'\}$，那么会生成一个状态子集。这个子集我们用$G1=<U,D,R2,L2,F2,B2>$表示。在这个子集里面，角块和边块的方向是不会改变的，并且这点可以在盲拧中体会到。那就是说，对于一个块（边块或角块）而言，其方向是不会改变的。而魔方顶面与底面之间夹心的那四块边块仍然会保留在魔方顶面与底面之间。自然，魔方顶面与底面的边角块仍然会处在魔方顶面与底面。在第一阶段的搜索中，本算法会查找能把一个打乱的魔方变成G1状态的步法。那就是说，做完该步后，整个魔方边/角块方向都被纠正。在这个抽象的空间里，移动魔方一步会把代表魔方状态的三维组$(x,y,z)$变成$(x',y',z')$，所有G1状态的魔方都拥有相同的三位组$(x0,y0,z0)$，而这就是第一阶段搜索的目标。在 Cube Explorer 2中，它会给出需求解的魔方确切的达到G1状态的最少步数。这种启发式的算法可以在产生解法的时候提前剪枝，不需要等待一段非常非常长的时间来等结果。这种启发式的算法 h1使用的是基于内存的查表方法~\cite{38}，最多允许提前12步做出判断剪枝。
+
+第二阶段：在该阶段搜索中，会使用G1步法$\{U,D,R2,L2,F2,B2\}$来复原魔方。实际上就是复原八个角块，魔方顶面与底面的八个边块和魔方顶面与底面夹心的那四块的位置。启发式函数 h2(a，b，c) 只对复原六面的步法长度内的情况做出评估，因为G1子集里面的情况实在太多了。本算法不会在找到上面的解法后停止，而是会继续的在第一阶段的结果基础上继续展开第二阶段的搜索。举一个例子，如果上面的解法找到第1阶段需要10步，第2阶段需要12步，但后面搜索的结果可能是第1阶段11步，而第2阶段变成了5步。第1阶段的步法长度增加了，但第2阶段的步法减少了。如果第2阶段的步法长度减少到0。那么这个解法是优化完毕的，算法结束。 但是当前的两阶段搜索算法并不能在所有的情况下都找到最优解，在这种情况下我们必须倒回头，继续做一次二阶段搜索。这会增加相当多大的时间。
+
+在该两阶段算法中，A*算法的启发函数进行初始化操作的同时会生成一个映射表，然后以魔方的原始状态为起点进行若干次操作，组成一颗操作树，显而易见，其根节点为魔方的原始状态。遍历操作树上面的所有节点，也就是每一个状态，从表上可以映射为一个启发函数值，其值的大小就为节点的深度。因为此时魔方的状态就是魔方在原始状态下通过其树的深度值次数的操作结果，经过相反的操作即可还原魔方。
+
+同时，操作树上每个节点向上搜索必然存在状态相同的不同节点，因为启发函数的值应该为最小值才可以保证精度，因此，我们在遍历操作树的时候，使用广度优先搜索，保证浅层的节点先被记录，而深层同状态的节点因为已经存在映射关系而会被忽略。
+
+得到映射表之后，在调用启发函数的时候，根据当前的魔方状态，经过查表可以获得启发函数的值，使用A*算法判断魔方的下一个判断即可，同时因为迭代加深的缘故，节点的判断函数都是准确的，而且不需要记录对未搜索的可达的节点。
+
+本系统使用基于Python语言编程的Kociemba算法，以顶面、右面、前面、底面、左面与背面的顺序依次输入其颜色所代表的方位，即可得到魔方复原的步骤。
+
+\subsection{并行旋转优化算法}
+
+由魔方还原算法得出魔方求解步骤后，上位机将还原指令通过USB串口发送至下位机，下位机接收到其指令后，对该指令进行并行优化处理，根据不同情况执行不同旋转步骤。该算法的算法流程图如下图~\ref{fig:3-9}~所示：
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.4\textwidth]{3-9}
+	\caption{并行优化算法流程图}\label{fig:3-9}
+\end{figure}
+
+\noindent 该算法流程如下所示：
+
+\begin{enumerate}[itemsep=2pt,topsep=0pt,parsep=0pt]
+	\item 新建两个指针指向还原指令中的前两个指令。
+	\item 判断指针是否为空。若为空，结束该算法；若不为空，跳转至步骤3。
+	\item 判断指针指向的两个指令是否控制相对方向的旋转，即U与D、L与R、F与B。如果是，跳转至步骤4，如果不是，跳转至步骤5。
+	\item 同时执行两个指令并使指针后移两位。跳转至步骤2。
+	\item 执行第一个指针指向的指令并使指针后移一位。跳转至步骤2。
+\end{enumerate}
+
+\section{系统界面截图}
+
+\subsection{初始界面}
+
+本系统的整体界面是由图~\ref{fig:3-2}~的整体设计图转化而来的。
+
+本系统的界面一共包含三个部分：界面最上端是图片显示部分，位于界面中心位置是魔方颜色模拟部分，下端是系统操作部分。
+
+系统开始运行后，其初始界面如下图~\ref{fig:3-10}~所示。点击Recognize按钮，本系统便开始进行魔方块颜色识别环节。在该环节，三个摄像头分别从左前、右前、右后方三个角度获取四张照片从而对各个魔方块进行颜色识别。
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\textwidth]{3-10}
+	\caption{系统初始界面}\label{fig:3-10}
+\end{figure}
+
+\subsection{颜色矫正}
+
+对于颜色矫正部分，该界面如下图~\ref{fig:3-11}~所示。魔方块颜色识别完成后，系统界面上端会显示摄像头捕捉并标注候选框后的四张图像；系统界面中间部分会显示对应位置的颜色，例如L1位置的背景色是橙色，这代表着魔方左侧第一块的颜色为橙色；而当系统不能完全正确识别魔方块时，系统下端出现颜色修正以及可行性验证按钮。
+
+本系统可对所有魔方块的颜色进行手工矫正，在颜色矫正栏输入魔方块位置与颜色即可对修改相应魔方块的识别颜色，例如在下图的文本框中输入R1与Red并点击Correct按钮，系统中间部分R1位置的魔方块背景色会被更改为红色，同时魔方块颜色序列中的相应位置也会被修改成红色，因此实现人工更正识别结果，可进一步增加系统的还原准确性。
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\textwidth]{3-11}
+	\caption{颜色矫正界面}\label{fig:3-11}
+\end{figure}
+
+\subsection{还原可行性验证}
+
+在上述的魔方块颜色矫正步骤之后，R1位置的魔方块背景色被更改为红色，如下图~\ref{fig:3-12}~所示。此时，系统可再次对校正后的魔方块颜色进行还原算法的求解。
+
+如果矫正后仍然不能得到可行的还原步骤，那么证明并没有完全矫正正确，仍然需要重复颜色矫正操作。
+
+如果系统提示Solved，则证明已经得到可行的复原步骤，下一步点击Solve按钮即可进行还原操作。
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\textwidth]{3-12}
+	\caption{还原可行性效果图}\label{fig:3-12}
+\end{figure}
+
+\subsection{魔方块还原}
+
+在魔方块还原部分，不管是识别完全正确还是魔方块颜色矫正完成后得到可行的复原步骤，都需要执行魔方块还原操作。
+
+在本系统得到魔方还原操作的序列后，点击Solve按钮后即可发送电机还原旋转指令对打乱的魔方进行还原，如下图~\ref{fig:3-13}~所示。
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.95\textwidth]{3-13}
+	\caption{魔方块还原结果界面}\label{fig:3-13}
+\end{figure}
+
+\section{本章小结}
+
+本章首先简要介绍系统的开发平台和环境配置，接着列举系统目录规划表以及系统整体算法的流程图，再详细介绍本系统的界面设计，本系统使用的两阶段还原算法以及设计并行优化旋转操作策略。最后根据系统的不同功能截图展示本魔方复原系统的界面。
